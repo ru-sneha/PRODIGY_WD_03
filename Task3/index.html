@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Tic Tac Toe</title>
+    <style>
+        :root {
+            --primary-color: #4a6bff;
+            --secondary-color: #ff4a8d;
+            --background-color: #1a1a2e;
+            --board-color: #16213e;
+            --cell-color: #0f3460;
+            --text-color: #e7e7e7;
+            --x-color: #4a6bff;
+            --o-color: #ff4a8d;
+            --hover-color: #2a4374;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(74, 107, 255, 0.1), transparent 70%);
+            pointer-events: none;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            padding: 20px;
+            border-radius: 20px;
+            background-color: rgba(22, 33, 62, 0.7);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .container::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+            transform: rotate(45deg);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 3px;
+        }
+
+        .status {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: 500;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 10px;
+            margin: 0 auto;
+            max-width: 350px;
+            background-color: var(--board-color);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .cell {
+            aspect-ratio: 1/1;
+            background-color: var(--cell-color);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .cell:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .cell.x {
+            color: var(--x-color);
+        }
+
+        .cell.o {
+            color: var(--o-color);
+        }
+
+        .cell.x::before,
+        .cell.x::after {
+            content: '';
+            position: absolute;
+            width: 80%;
+            height: 10%;
+            background-color: var(--x-color);
+            border-radius: 5px;
+        }
+
+        .cell.x::before {
+            transform: rotate(45deg);
+        }
+
+        .cell.x::after {
+            transform: rotate(-45deg);
+        }
+
+        .cell.o::before {
+            content: '';
+            position: absolute;
+            width: 60%;
+            height: 60%;
+            border: 10px solid var(--o-color);
+            border-radius: 50%;
+            box-sizing: border-box;
+        }
+
+        .cell.x.win::before,
+        .cell.x.win::after {
+            background-color: #00ff9d;
+            box-shadow: 0 0 15px #00ff9d;
+        }
+
+        .cell.o.win::before {
+            border-color: #00ff9d;
+            box-shadow: 0 0 15px #00ff9d;
+        }
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            transition: all 0.4s ease;
+            z-index: -1;
+            border-radius: 50px;
+        }
+
+        .btn:hover::before {
+            width: 100%;
+        }
+
+        .btn:hover {
+            box-shadow: 0 5px 15px rgba(74, 107, 255, 0.4);
+            transform: translateY(-3px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: rgba(15, 52, 96, 0.5);
+            border-radius: 10px;
+        }
+
+        .score {
+            text-align: center;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .score:hover {
+            background-color: rgba(42, 67, 116, 0.5);
+            transform: translateY(-3px);
+        }
+
+        .score h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .score p {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .player-x {
+            color: var(--x-color);
+        }
+
+        .player-o {
+            color: var(--o-color);
+        }
+
+        .player-ties {
+            color: #00ff9d;
+        }
+
+        .win-line {
+            position: absolute;
+            background-color: #00ff9d;
+            z-index: 1;
+            box-shadow: 0 0 10px #00ff9d;
+        }
+
+        .horizontal {
+            height: 10px;
+            width: 0;
+            border-radius: 5px;
+            animation: stretch-horizontal 0.5s forwards;
+        }
+
+        .vertical {
+            width: 10px;
+            height: 0;
+            border-radius: 5px;
+            animation: stretch-vertical 0.5s forwards;
+        }
+
+        .diagonal {
+            height: 10px;
+            width: 0;
+            border-radius: 5px;
+            animation: stretch-diagonal 0.5s forwards;
+        }
+
+        @keyframes stretch-horizontal {
+            to { width: 90%; }
+        }
+
+        @keyframes stretch-vertical {
+            to { height: 90%; }
+        }
+
+        @keyframes stretch-diagonal {
+            to { width: 125%; }
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--board-color);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            transform: translateY(-50px);
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .modal p {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            border-radius: 50%;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .status {
+                font-size: 1.2rem;
+            }
+
+            .cell {
+                font-size: 2.5rem;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+
+            .score h3 {
+                font-size: 1rem;
+            }
+
+            .score p {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tic Tac Toe</h1>
+        
+        <div class="score-board">
+            <div class="score player-x">
+                <h3>Player X</h3>
+                <p id="x-score">0</p>
+            </div>
+            <div class="score player-ties">
+                <h3>Ties</h3>
+                <p id="ties">0</p>
+            </div>
+            <div class="score player-o">
+                <h3>Player O</h3>
+                <p id="o-score">0</p>
+            </div>
+        </div>
+        
+        <div class="status" id="status">Player X's turn</div>
+        
+        <div class="board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" id="reset-btn">Reset Game</button>
+            <button class="btn" id="new-game-btn">New Game</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="win-modal">
+        <div class="modal-content">
+            <h2>Game Over</h2>
+            <p id="modal-message">Player X wins!</p>
+            <button class="btn" id="play-again-btn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const board = document.getElementById('board');
+            const cells = document.querySelectorAll('.cell');
+            const status = document.getElementById('status');
+            const resetBtn = document.getElementById('reset-btn');
+            const newGameBtn = document.getElementById('new-game-btn');
+            const modal = document.getElementById('win-modal');
+            const modalMessage = document.getElementById('modal-message');
+            const playAgainBtn = document.getElementById('play-again-btn');
+            const xScoreElement = document.getElementById('x-score');
+            const oScoreElement = document.getElementById('o-score');
+            const tiesElement = document.getElementById('ties');
+            
+            // Game state
+            let currentPlayer = 'x';
+            let gameBoard = ['', '', '', '', '', '', '', '', ''];
+            let gameActive = true;
+            let scores = {
+                x: 0,
+                o: 0,
+                ties: 0
+            };
+            
+            // Winning combinations
+            const winningCombinations = [
+                [0, 1, 2], // top row
+                [3, 4, 5], // middle row
+                [6, 7, 8], // bottom row
+                [0, 3, 6], // left column
+                [1, 4, 7], // middle column
+                [2, 5, 8], // right column
+                [0, 4, 8], // diagonal top-left to bottom-right
+                [2, 4, 6]  // diagonal top-right to bottom-left
+            ];
+            
+            // Initialize game
+            function initGame() {
+                gameBoard = ['', '', '', '', '', '', '', '', ''];
+                gameActive = true;
+                currentPlayer = 'x';
+                status.textContent = `Player X's turn`;
+                status.style.color = 'var(--x-color)';
+                
+                cells.forEach(cell => {
+                    cell.className = 'cell';
+                    cell.textContent = '';
+                });
+                
+                // Remove any win lines
+                const winLines = document.querySelectorAll('.win-line');
+                winLines.forEach(line => line.remove());
+            }
+            
+            // Handle cell click
+            function handleCellClick(e) {
+                const cell = e.target;
+                const index = parseInt(cell.getAttribute('data-index'));
+                
+                // Check if cell is already filled or game is not active
+                if (gameBoard[index] !== '' || !gameActive) {
+                    return;
+                }
+                
+                // Update game board and UI
+                gameBoard[index] = currentPlayer;
+                cell.classList.add(currentPlayer);
+                
+                // Add click animation
+                cell.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    cell.style.transform = '';
+                }, 150);
+                
+                // Check for win or draw
+                if (checkWin()) {
+                    const winner = currentPlayer.toUpperCase();
+                    status.textContent = `Player ${winner} wins!`;
+                    status.style.color = currentPlayer === 'x' ? 'var(--x-color)' : 'var(--o-color)';
+                    gameActive = false;
+                    
+                    // Update score
+                    scores[currentPlayer]++;
+                    updateScoreDisplay();
+                    
+                    // Show win modal with delay
+                    setTimeout(() => {
+                        modalMessage.textContent = `Player ${winner} wins!`;
+                        modal.classList.add('active');
+                        createConfetti();
+                    }, 1000);
+                    
+                    return;
+                }
+                
+                if (checkDraw()) {
+                    status.textContent = 'Game ended in a draw!';
+                    status.style.color = 'var(--text-color)';
+                    gameActive = false;
+                    
+                    // Update ties score
+                    scores.ties++;
+                    updateScoreDisplay();
+                    
+                    // Show draw modal with delay
+                    setTimeout(() => {
+                        modalMessage.textContent = 'Game ended in a draw!';
+                        modal.classList.add('active');
+                    }, 1000);
+                    
+                    return;
+                }
+                
+                // Switch player
+                currentPlayer = currentPlayer === 'x' ? 'o' : 'x';
+                status.textContent = `Player ${currentPlayer.toUpperCase()}'s turn`;
+                status.style.color = currentPlayer === 'x' ? 'var(--x-color)' : 'var(--o-color)';
+            }
+            
+            // Check for win
+            function checkWin() {
+                for (let i = 0; i < winningCombinations.length; i++) {
+                    const [a, b, c] = winningCombinations[i];
+                    if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                        // Highlight winning cells
+                        cells[a].classList.add('win');
+                        cells[b].classList.add('win');
+                        cells[c].classList.add('win');
+                        
+                        // Draw win line
+                        drawWinLine(a, b, c);
+                        
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
+            // Draw win line
+            function drawWinLine(a, b, c) {
+                const combination = [a, b, c].sort((x, y) => x - y);
+                const line = document.createElement('div');
+                line.classList.add('win-line');
+                
+                // Get positions
+                const cellA = cells[a].getBoundingClientRect();
+                const cellC = cells[c].getBoundingClientRect();
+                const boardRect = board.getBoundingClientRect();
+                
+                // Determine line type and position
+                if (combination[0] % 3 === 0 && combination[2] % 3 === 2) {
+                    // Horizontal line
+                    const row = Math.floor(combination[0] / 3);
+                    line.classList.add('horizontal');
+                    line.style.top = `${(cellA.top + cellA.height / 2) - boardRect.top}px`;
+                    line.style.left = `${cellA.left + cellA.width / 2 - boardRect.left}px`;
+                } else if (combination[0] <= 2 && combination[2] >= 6) {
+                    // Vertical line
+                    const col = combination[0] % 3;
+                    line.classList.add('vertical');
+                    line.style.left = `${(cellA.left + cellA.width / 2) - boardRect.left}px`;
+                    line.style.top = `${cellA.top + cellA.height / 2 - boardRect.top}px`;
+                } else if ((combination[0] === 0 && combination[2] === 8) || (combination[0] === 2 && combination[2] === 6)) {
+                    // Diagonal line
+                    line.classList.add('diagonal');
+                    line.style.top = `${(cellA.top + cellA.height / 2) - boardRect.top}px`;
+                    line.style.left = `${cellA.left + cellA.width / 2 - boardRect.left}px`;
+                    
+                    if (combination[0] === 0) {
+                        line.style.transform = 'rotate(45deg)';
+                        line.style.transformOrigin = 'left center';
+                    } else {
+                        line.style.transform = 'rotate(-45deg)';
+                        line.style.transformOrigin = 'right center';
+                    }
+                }
+                
+                board.appendChild(line);
+            }
+            
+            // Check for draw
+            function checkDraw() {
+                return !gameBoard.includes('');
+            }
+            
+            // Update score display
+            function updateScoreDisplay() {
+                xScoreElement.textContent = scores.x;
+                oScoreElement.textContent = scores.o;
+                tiesElement.textContent = scores.ties;
+            }
+            
+            // Create confetti effect
+            function createConfetti() {
+                const colors = ['#4a6bff', '#ff4a8d', '#00ff9d', '#ffcc00', '#ff00cc'];
+                const confettiCount = 100;
+                
+                for (let i = 0; i < confettiCount; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    
+                    // Random position, color, size and animation duration
+                    const size = Math.random() * 10 + 5;
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    const left = Math.random() * 100;
+                    const duration = Math.random() * 3 + 2;
+                    
+                    confetti.style.width = `${size}px`;
+                    confetti.style.height = `${size}px`;
+                    confetti.style.backgroundColor = color;
+                    confetti.style.left = `${left}%`;
+                    confetti.style.top = '-10px';
+                    confetti.style.animationDuration = `${duration}s`;
+                    
+                    document.body.appendChild(confetti);
+                    
+                    // Remove confetti after animation
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, duration * 1000);
+                }
+            }
+            
+            // Event listeners
+            cells.forEach(cell => {
+                cell.addEventListener('click', handleCellClick);
+            });
+            
+            resetBtn.addEventListener('click', initGame);
+            
+            newGameBtn.addEventListener('click', function() {
+                initGame();
+                scores = { x: 0, o: 0, ties: 0 };
+                updateScoreDisplay();
+            });
+            
+            playAgainBtn.addEventListener('click', function() {
+                modal.classList.remove('active');
+                initGame();
+            });
+            
+            // Add hover sound effect
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', () => {
+                    // You could add a subtle sound here if desired
+                    button.style.transition = 'all 0.2s ease';
+                });
+            });
+            
+            // Initialize the game
+            initGame();
+        });
+    </script>
+</body>
+</html>
